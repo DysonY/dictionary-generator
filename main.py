@@ -11,12 +11,14 @@ def get_title(url):
     else:
         return get_title(url[:-1]) + url[-1]
 
+
 # Fetch JSON data corresponding to page title
 def get_json(title):
     url = f'https://dbpedia.org/data/{title}.json'
     try:
         return requests.get(url, allow_redirects = True).json()
     except:
+        print(f'Unable to fetch {url}.')
         return dict()
 
 
@@ -37,6 +39,7 @@ def get_abstract(data, title):
         if abstract['lang'] == 'en':
             return abstract['value']
     return ''
+
 
 assert len(sys.argv) == 2
 
@@ -62,7 +65,12 @@ for url in sub_topics:
     output[subtopic_title] = get_abstract(sub_data, subtopic_title)
 
 
+# Remove blank entries
+output = { key : val for key, val in output.items() if val != '' }
+
+
 # Write dictionary as JSON file
 print('Writing dictionary...')
 with open(f'{title}.json', 'w') as target:
     json.dump(output, target, indent=4)
+
